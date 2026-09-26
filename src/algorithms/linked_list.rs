@@ -18,6 +18,15 @@ pub struct LinkedList {
 }
 
 impl LinkedList{
+    pub fn new() -> Self{
+        Self {
+            head: None,
+            tail: None,
+        }
+    }
+    fn default() -> Self {
+        Self::new()
+    }
     pub fn push_front(&mut self, val:u32) -> () {
         if self.head.is_none() {
             // Create a new isolated node wrapped for shared ownership and mutability
@@ -74,4 +83,5 @@ impl LinkedList{
             self.tail = Some(new_node);
         }
     }
+
 }

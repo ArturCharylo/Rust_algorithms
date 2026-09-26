@@ -24,9 +24,6 @@ impl LinkedList{
             tail: None,
         }
     }
-    fn default() -> Self {
-        Self::new()
-    }
     pub fn push_front(&mut self, val:u32) -> () {
         if self.head.is_none() {
             // Create a new isolated node wrapped for shared ownership and mutability
@@ -83,5 +80,42 @@ impl LinkedList{
             self.tail = Some(new_node);
         }
     }
+    pub fn pop_back(&mut self) -> Option<u32> {
+        // If self.tail is None, ? immediately returns None from the function
+        let old_tail = self.tail.take()?;
+        // Check if the removed node had a predecessor
+        let prev_node = old_tail.borrow_mut().prev.take().and_then(|weak| weak.upgrade());
+        match prev_node {
+        Some(new_tail) => {
+                new_tail.borrow_mut().next = None;
+                self.tail = Some(new_tail);
+            }
+            None => {
+                self.head = None;
+            }
+        }
+        let val = old_tail.borrow().val;
+        Some(val)
+    }
+    pub fn pop_front(&mut self) -> Option<u32> {
+        let old_head = self.head.take()?;
+        let next_node = old_head.borrow_mut().next.take();
+        match next_node {
+            Some(next_node) => {
+                next_node.borrow_mut().prev = None;
+                self.head = Some(next_node);
+            }
+            None => {
+                self.tail = None;
+            }
+        }
+        let val = old_head.borrow().val;
+        Some(val)
+    }
+}
 
+impl Default for LinkedList {
+    fn default() -> Self {
+        Self::new()
+    }
 }

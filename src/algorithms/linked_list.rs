@@ -2,29 +2,29 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 // Strong reference to a node
-type NodeRef = Rc<RefCell<Node>>;
+type NodeRef<T> = Rc<RefCell<Node<T>>>;
 // Weak reference to a node to prevent reference cycles
-type WeakNodeRef = Weak<RefCell<Node>>;
+type WeakNodeRef<T> = Weak<RefCell<Node<T>>>;
 
-pub struct Node {
-    pub val: u32,
-    pub next: Option<NodeRef>,
-    pub prev: Option<WeakNodeRef>,
+pub struct Node<T> {
+    pub val: T,
+    pub next: Option<NodeRef<T>>,
+    pub prev: Option<WeakNodeRef<T>>,
 }
 
-pub struct LinkedList {
-    head: Option<NodeRef>,
-    tail: Option<NodeRef>,
+pub struct LinkedList<T> {
+    head: Option<NodeRef<T>>,
+    tail: Option<NodeRef<T>>,
 }
 
-impl LinkedList{
+impl<T> LinkedList<T>{
     pub fn new() -> Self{
         Self {
             head: None,
             tail: None,
         }
     }
-    pub fn push_front(&mut self, val:u32) -> () {
+    pub fn push_front(&mut self, val:T) -> () {
         if self.head.is_none() {
             // Create a new isolated node wrapped for shared ownership and mutability
             let new_node = Rc::new(RefCell::new(Node {
@@ -52,7 +52,7 @@ impl LinkedList{
             self.head = Some(new_node);
         }
     }
-    pub fn push_back(&mut self, val:u32) -> () {
+    pub fn push_back(&mut self, val:T) -> () {
         if self.tail.is_none() {
             // Create a new isolated node wrapped for shared ownership and mutability
             let new_node = Rc::new(RefCell::new(Node {
@@ -80,7 +80,7 @@ impl LinkedList{
             self.tail = Some(new_node);
         }
     }
-    pub fn pop_back(&mut self) -> Option<u32> {
+    pub fn pop_back(&mut self) -> Option<T> {
         // If self.tail is None, ? immediately returns None from the function
         let old_tail = self.tail.take()?;
         // Check if the removed node had a predecessor
@@ -94,10 +94,15 @@ impl LinkedList{
                 self.head = None;
             }
         }
-        let val = old_tail.borrow().val;
-        Some(val)
+        // Extract the inner Node out of Rc and RefCell
+        if let Ok(ref_cell) = Rc::try_unwrap(old_tail) {
+            let node = ref_cell.into_inner();
+            Some(node.val)
+        } else {
+            None
+        }
     }
-    pub fn pop_front(&mut self) -> Option<u32> {
+    pub fn pop_front(&mut self) -> Option<T> {
         let old_head = self.head.take()?;
         let next_node = old_head.borrow_mut().next.take();
         match next_node {
@@ -109,12 +114,17 @@ impl LinkedList{
                 self.tail = None;
             }
         }
-        let val = old_head.borrow().val;
-        Some(val)
+        // Extract the inner Node out of Rc and RefCell
+        if let Ok(ref_cell) = Rc::try_unwrap(old_head) {
+            let node = ref_cell.into_inner();
+            Some(node.val)
+        } else {
+            None
+        }
     }
 }
 
-impl Default for LinkedList {
+impl<T> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }

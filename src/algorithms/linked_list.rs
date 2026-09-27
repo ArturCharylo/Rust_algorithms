@@ -17,6 +17,8 @@ pub struct LinkedList<T> {
     tail: Option<NodeRef<T>>,
 }
 
+pub struct IntoIter<T>(LinkedList<T>);
+
 impl<T> LinkedList<T>{
     pub fn new() -> Self{
         Self {
@@ -127,5 +129,23 @@ impl<T> LinkedList<T>{
 impl<T> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop_front()
+    }
+}
+
+impl<T> IntoIterator for LinkedList<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        // Wrap self into the IntoIter tuple struct
+        IntoIter(self)
     }
 }

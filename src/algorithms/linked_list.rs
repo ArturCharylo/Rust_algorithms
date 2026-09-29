@@ -155,3 +155,9 @@ impl<T> IntoIterator for LinkedList<T> {
         IntoIter(self)
     }
 }
+
+impl<T> Drop for LinkedList<T> {
+    fn drop(&mut self) {
+        while self.pop_back().is_some() {}
+    }
+}

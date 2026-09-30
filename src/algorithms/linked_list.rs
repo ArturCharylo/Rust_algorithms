@@ -15,6 +15,7 @@ pub struct Node<T> {
 pub struct LinkedList<T> {
     head: Option<NodeRef<T>>,
     tail: Option<NodeRef<T>>,
+    length: usize,
 }
 
 pub struct IntoIter<T>(LinkedList<T>);
@@ -24,6 +25,7 @@ impl<T> LinkedList<T>{
         Self {
             head: None,
             tail: None,
+            length: 0,
         }
     }
     pub fn push_front(&mut self, val:T) -> () {
@@ -36,6 +38,7 @@ impl<T> LinkedList<T>{
             }));
             self.head = Some(Rc::clone(&new_node));
             self.tail = Some(new_node);
+            self.length += 1;
         }
         else{
             let new_node = Rc::new(RefCell::new(Node {
@@ -52,6 +55,7 @@ impl<T> LinkedList<T>{
 
             // Set the new node as the head of the list
             self.head = Some(new_node);
+            self.length += 1;
         }
     }
     pub fn push_back(&mut self, val:T) -> () {
@@ -64,6 +68,7 @@ impl<T> LinkedList<T>{
             }));
             self.head = Some(Rc::clone(&new_node));
             self.tail = Some(new_node);
+            self.length += 1;
         }
         else{
             let new_node = Rc::new(RefCell::new(Node {
@@ -80,6 +85,7 @@ impl<T> LinkedList<T>{
 
             // Set the new node as the head of the list
             self.tail = Some(new_node);
+            self.length += 1;
         }
     }
     pub fn pop_back(&mut self) -> Option<T> {
@@ -99,6 +105,7 @@ impl<T> LinkedList<T>{
         // Extract the inner Node out of Rc and RefCell
         if let Ok(ref_cell) = Rc::try_unwrap(old_tail) {
             let node = ref_cell.into_inner();
+            self.length -= 1;
             Some(node.val)
         } else {
             None
@@ -119,10 +126,17 @@ impl<T> LinkedList<T>{
         // Extract the inner Node out of Rc and RefCell
         if let Ok(ref_cell) = Rc::try_unwrap(old_head) {
             let node = ref_cell.into_inner();
+            self.length -= 1;
             Some(node.val)
         } else {
             None
         }
+    }
+    pub fn len(&self) -> usize{
+        return self.length;
+    }
+    pub fn is_empty(&self) -> bool {
+        return self.length == 0
     }
 }
 

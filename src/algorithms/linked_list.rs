@@ -175,3 +175,50 @@ impl<T> Drop for LinkedList<T> {
         while self.pop_back().is_some() {}
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pop() {
+        let mut list = LinkedList::new();
+        list.push_back(5);
+        assert_eq!(list.pop_back(), Some(5));
+    }
+
+    #[test]
+    fn test_basic() {
+        let mut list = LinkedList::new();
+        assert!(list.is_empty());
+        list.push_back(3);
+        list.push_back(5);
+        assert_eq!(list.len(), 2);
+        list.pop_back();
+        assert_eq!(list.len(), 1);
+        assert!(!list.is_empty());
+        list.push_back(7);
+        list.push_back(3);
+        assert_eq!(list.len(), 3);
+    }
+
+    #[test]
+    fn test_into_iter() {
+        let mut list = LinkedList::new();
+        list.push_back(1);
+        list.push_back(2);
+        list.push_back(3);
+
+        // Collect consumed elements into a standard vector
+        let collected: Vec<i32> = list.into_iter().collect();
+        assert_eq!(collected, vec![1, 2, 3]);
+
+        let mut list2 = LinkedList::new();
+        list2.push_back(1);
+        list2.push_back(2);
+        list2.push_back(3);
+
+        let collected2: Vec<i32> = list2.into_iter().rev().collect();
+        assert_eq!(collected2, vec![3, 2, 1]);
+    }
+}
